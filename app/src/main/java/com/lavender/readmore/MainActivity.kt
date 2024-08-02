@@ -6,18 +6,21 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.lavender.readmore.screens.bookdata.BookDataScreen
+import com.lavender.readmore.screens.booklist.BookListScreen
 import com.lavender.readmore.ui.theme.ReadMoreTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val tag = "MainActivity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -27,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    BookListScreen()
+                    ReadMoreNavHost()
                 }
             }
         }
@@ -37,24 +40,22 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ReadMoreNavHost(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "main") {
+    startDestination: String = "book-list"
+) {
     NavHost(navController = navController, startDestination = startDestination) {
+        composable("book-list") {
+            BookListScreen(
+                onBookData = { uuid: String -> navController.navigate("book-data/$uuid") }
+            )
+        }
 
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ReadMoreTheme {
-        Greeting("Android")
+        composable("book-data/{uuid}") {
+            it.arguments?.getString("uuid")?.let { uuid ->
+                BookDataScreen(
+                    uuid = uuid,
+                    onBack = navController::popBackStack
+                )
+            }
+        }
     }
 }

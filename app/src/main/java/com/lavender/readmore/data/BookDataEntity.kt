@@ -7,12 +7,14 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "book-data")
 data class BookDataEntity(
     @PrimaryKey val uuid: String,
-    val name: String
+    val name: String,
+    val pageCount: Int
 )
 
 fun BookDataEntity.toData() = BookData(
     uuid = uuid,
-    name = name
+    name = name,
+    pageCount = pageCount
 )
 
 fun List<BookDataEntity>.toData() = map(BookDataEntity::toData)

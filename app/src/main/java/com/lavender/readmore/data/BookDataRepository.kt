@@ -14,4 +14,9 @@ class BookDataRepository @Inject constructor(
         Log.d(tag, "getBookDataStream")
         return dataSource.observeAll().map { it.toData() }
     }
+
+    suspend fun saveBookData(bookData: BookData) {
+        Log.d(tag, "saveBookData $bookData")
+        dataSource.upsert(bookData.toEntity())
+    }
 }
