@@ -2,8 +2,8 @@ package com.lavender.readmore.screens.booklist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lavender.readmore.data.BookData
-import com.lavender.readmore.data.BookDataRepository
+import com.lavender.readmore.model.bookdata.BookData
+import com.lavender.readmore.model.bookdata.BookDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

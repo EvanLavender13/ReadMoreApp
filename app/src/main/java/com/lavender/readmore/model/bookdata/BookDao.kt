@@ -1,4 +1,4 @@
-package com.lavender.readmore.data
+package com.lavender.readmore.model.bookdata
 
 import androidx.room.Dao
 import androidx.room.Query
@@ -11,8 +11,11 @@ interface BookDao {
     @Query("SELECT * FROM `book-data`")
     fun observeAll(): Flow<List<BookDataEntity>>
 
+    @Query("SELECT * FROM `book-data` ORDER BY active DESC")
+    fun observeAllSortedByActive(): Flow<List<BookDataEntity>>
+
     @Query("SELECT * FROM `book-data` WHERE uuid = :uuid")
-    fun observeById(uuid: String): Flow<BookDataEntity>
+    suspend fun getById(uuid: String): BookDataEntity?
 
     @Upsert
     suspend fun upsert(bookDataEntity: BookDataEntity)

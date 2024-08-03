@@ -1,4 +1,4 @@
-package com.lavender.readmore.data
+package com.lavender.readmore.model.bookdata
 
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
@@ -12,11 +12,16 @@ class BookDataRepository @Inject constructor(
 
     fun getBookDataStream(): Flow<List<BookData>> {
         Log.d(tag, "getBookDataStream")
-        return dataSource.observeAll().map { it.toData() }
+        return dataSource.observeAllSortedByActive().map { it.toData() }
+    }
+
+    suspend fun getBookDataById(uuid: String): BookData? {
+        Log.d(tag, "getBookDataById: $uuid")
+        return dataSource.getById(uuid)?.toData()
     }
 
     suspend fun saveBookData(bookData: BookData) {
-        Log.d(tag, "saveBookData $bookData")
+        Log.d(tag, "saveBookData: $bookData")
         dataSource.upsert(bookData.toEntity())
     }
 }

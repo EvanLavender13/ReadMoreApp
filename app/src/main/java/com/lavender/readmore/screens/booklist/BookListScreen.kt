@@ -1,14 +1,20 @@
 package com.lavender.readmore.screens.booklist
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,9 +50,28 @@ fun BookListScreen(
     ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding)) {
             items(uiState.bookList) {
-                Text(it.uuid)
-                Text(it.name)
-                Text(it.pageCount.toString())
+                Row(
+                    modifier = Modifier.clickable { onBookData(it.uuid) }
+                ) {
+                    Column {
+                        Text(text = it.uuid)
+                        Text(it.name)
+
+                        if (it.active && it.pageCount > 0) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(16.dp),
+                                progress = {
+                                    it.currentPage.toFloat() / it.pageCount
+                                },
+                            )
+                        }
+
+                        HorizontalDivider(thickness = 2.dp)
+                    }
+                }
+
             }
         }
     }
