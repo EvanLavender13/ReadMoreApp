@@ -5,6 +5,7 @@ classDiagram
 class BookData {
   +String uuid
   +String name
+  +String author
   +Int pageCount
   +Boolean active
   +Int currentPage
@@ -13,6 +14,7 @@ class BookData {
 class BookDataEntity {
   +String uuid
   +String name
+  +String author
   +Int pageCount
   +Boolean active
   +Int currentPage
@@ -24,6 +26,7 @@ BookData <-- BookSessionData : contains ID of
 class BookSessionData {
   +String uuid
   +String bookId
+  +Long date
   +Int fromPage
   +Int toPage
 }
@@ -31,6 +34,7 @@ class BookSessionData {
 class BookSessionDataEntity {
   +String uuid
   +String bookId
+  +Long date
   +Int fromPage
   +Int toPage
 }
