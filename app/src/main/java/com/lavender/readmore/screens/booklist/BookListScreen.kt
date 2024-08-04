@@ -35,8 +35,8 @@ fun BookListScreen(
     Scaffold(
         floatingActionButton = {
             Column(
-                modifier = Modifier.padding(25.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 FloatingActionButton(
                     onClick = { onBookData(UUID.randomUUID().toString()) }) {

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class BookSessionDataEntity(
     @PrimaryKey val uuid: String,
     val bookId: String,
-    // data
+    val date: Long,
     val fromPage: Int,
     val toPage: Int
 )
@@ -15,6 +15,7 @@ data class BookSessionDataEntity(
 fun BookSessionDataEntity.toData() = BookSessionData(
     uuid = uuid,
     bookId = bookId,
+    date = date,
     fromPage = fromPage,
     toPage = toPage
 )

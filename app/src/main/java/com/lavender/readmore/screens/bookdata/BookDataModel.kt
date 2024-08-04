@@ -11,34 +11,39 @@ import com.lavender.readmore.model.booksession.BookSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
+import kotlin.time.Duration
+import kotlin.time.measureTime
 
 data class BookDataState(
     val name: String = "default-name",
+    val author: String = "default-author",
     val pageCount: Int = 0,
     val active: Boolean = false,
-    val currentPage: Int = 0,
-
-    val bookSessionList: List<BookSessionData> = listOf()
+    val currentPage: Int = 1,
 )
 
 @HiltViewModel
 class BookDataModel @Inject constructor(
     private val bookRepository: BookDataRepository,
     private val bookSessionRepository: BookSessionRepository,
-    private val savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val tag = "BookDataModel"
 
     private val _uiState = MutableStateFlow(BookDataState())
     val uiState = _uiState.asStateFlow()
-    val uuid: String? = savedStateHandle["uuid"]
+    private val _uuid: String? = savedStateHandle["uuid"]
+    private var uuid: String = "default-uuid"
+    private var currentPage: Int = 0
 
     init {
-        uuid?.let {
+        _uuid?.let {
+            uuid = _uuid
             loadBookData(uuid)
         }
     }
@@ -50,6 +55,7 @@ class BookDataModel @Inject constructor(
                 BookData(
                     uuid = uuid,
                     name = uiState.value.name,
+                    author = uiState.value.author,
                     pageCount = uiState.value.pageCount,
                     active = uiState.value.active,
                     currentPage = uiState.value.currentPage
@@ -66,19 +72,47 @@ class BookDataModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         name = bookData.name,
+                        author = bookData.author,
                         pageCount = bookData.pageCount,
                         active = bookData.active,
                         currentPage = bookData.currentPage
                     )
                 }
-            }
 
-            bookSessionRepository.getBookSessionDataStream(uuid).map { bookSessionList ->
-                Log.d(tag, "loadBookData sessions: ${bookSessionList.size}")
-                _uiState.update {
-                    it.copy(bookSessionList = bookSessionList)
-                }
+                currentPage = bookData.currentPage
             }
+        }
+    }
+
+    fun recordSession() {
+        val totalPageCount = uiState.value.pageCount
+        val newPage = uiState.value.currentPage
+
+        Log.d(
+            tag,
+            "recordSession currentPage: $currentPage, newPage: $newPage, totalPageCount: $totalPageCount"
+        )
+
+        if (newPage > currentPage) {
+            val pageCount = newPage - currentPage
+            Log.d(tag, "recordSession pages read: $pageCount")
+
+            viewModelScope.launch {
+                bookSessionRepository.saveBookSessionData(
+                    BookSessionData(
+                        uuid = UUID.randomUUID().toString(),
+                        bookId = uuid,
+                        date = System.currentTimeMillis(),
+                        fromPage = currentPage,
+                        toPage = newPage
+                    )
+                )
+
+                currentPage = newPage
+                saveBookData(uuid)
+            }
+        } else {
+            Log.d(tag, "recordSession no session recorded: newPage <= currentPage")
         }
     }
 
@@ -89,10 +123,17 @@ class BookDataModel @Inject constructor(
         }
     }
 
+    fun updateAuthor(author: String) {
+        Log.d(tag, "updateAuthor: $author")
+        _uiState.update {
+            it.copy(author = author)
+        }
+    }
+
     fun updatePageCount(pageCountStr: String) {
         Log.d(tag, "updatePageCount: $pageCountStr")
 
-        var pageCount = 0
+        var pageCount = uiState.value.pageCount
         pageCountStr.toIntOrNull()?.let { pageCount = it }
 
         _uiState.update {
@@ -105,6 +146,17 @@ class BookDataModel @Inject constructor(
 
         _uiState.update {
             it.copy(active = active)
+        }
+    }
+
+    fun updateCurrentPage(currentPageStr: String) {
+        Log.d(tag, "updateCurrentPage: $currentPageStr")
+
+        var currentPage = uiState.value.currentPage
+        currentPageStr.toIntOrNull()?.let { currentPage = it }
+
+        _uiState.update {
+            it.copy(currentPage = currentPage)
         }
     }
 }

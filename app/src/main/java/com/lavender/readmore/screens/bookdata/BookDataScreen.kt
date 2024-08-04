@@ -9,13 +9,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,21 +26,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.time.Instant
 
 @Composable
 fun BookDataScreen(
-    viewModel: BookDataModel = hiltViewModel(),
+    bookDataViewModel: BookDataModel = hiltViewModel(),
+    bookSessionViewModel: BookSessionDataModel = hiltViewModel(),
     uuid: String,
     onBack: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val bookDataState by bookDataViewModel.uiState.collectAsState()
+    val bookSessionState by bookSessionViewModel.uiState.collectAsState()
 
     Scaffold(
         floatingActionButton = {
             Column(
-                modifier = Modifier.padding(25.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                FloatingActionButton(
+                    onClick = bookDataViewModel::recordSession
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Record Session"
+                    )
+                }
+
                 FloatingActionButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -48,7 +62,7 @@ fun BookDataScreen(
 
                 FloatingActionButton(
                     onClick = {
-                        viewModel.saveBookData(uuid)
+                        bookDataViewModel.saveBookData(uuid)
                         onBack()
                     }
                 ) {
@@ -62,25 +76,44 @@ fun BookDataScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             Row {
-                TextField(
+                OutlinedTextField(
                     modifier = Modifier.weight(1.0f),
-                    value = uiState.name,
+                    value = bookDataState.name,
                     label = { Text(text = "Name") },
-                    onValueChange = viewModel::updateName
+                    onValueChange = bookDataViewModel::updateName
                 )
             }
 
             Row {
-                TextField(
+                OutlinedTextField(
                     modifier = Modifier.weight(1.0f),
-                    value = uiState.pageCount.toString(),
+                    value = bookDataState.author,
+                    label = { Text(text = "Author") },
+                    onValueChange = bookDataViewModel::updateAuthor
+                )
+            }
+
+            Row {
+                OutlinedTextField(
+                    modifier = Modifier.weight(0.5f),
+                    value = bookDataState.currentPage.toString(),
+                    label = { Text(text = "Current Page") },
+                    onValueChange = bookDataViewModel::updateCurrentPage
+                )
+
+                Spacer(
+                    modifier = Modifier.padding(4.dp)
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.weight(0.5f),
+                    value = bookDataState.pageCount.toString(),
                     label = { Text(text = "Page Count") },
-                    onValueChange = viewModel::updatePageCount
+                    onValueChange = bookDataViewModel::updatePageCount
                 )
             }
 
             Row(
-                modifier = Modifier.padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Active")
@@ -90,24 +123,26 @@ fun BookDataScreen(
                 )
 
                 Switch(
-                    checked = uiState.active,
-                    onCheckedChange = viewModel::setActive
+                    checked = bookDataState.active,
+                    onCheckedChange = bookDataViewModel::setActive
                 )
             }
 
-            Row (
-                modifier = Modifier.padding(start = 8.dp),
+            Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Reading Sessions",
-                    fontSize = 16.sp)
+                    fontSize = 16.sp
+                )
             }
-        }
 
-        LazyColumn(modifier = Modifier.padding(padding)) {
-            items(uiState.bookSessionList) {
-                Text("A")
+            LazyColumn(modifier = Modifier.padding(padding)) {
+                items(bookSessionState.bookSessionList) {
+                    Text("${it.fromPage} to ${it.toPage}")
+                    Text(Instant.ofEpochMilli(it.date).toString())
+                    HorizontalDivider(thickness = 2.dp)
+                }
             }
         }
     }

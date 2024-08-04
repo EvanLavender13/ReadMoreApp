@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 data class BookDataEntity(
     @PrimaryKey val uuid: String,
     val name: String,
+    val author: String,
     val pageCount: Int,
     val active: Boolean,
     val currentPage: Int
@@ -16,6 +17,7 @@ data class BookDataEntity(
 fun BookDataEntity.toData() = BookData(
     uuid = uuid,
     name = name,
+    author = author,
     pageCount = pageCount,
     active = active,
     currentPage = currentPage

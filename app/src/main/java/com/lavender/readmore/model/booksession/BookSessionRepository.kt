@@ -10,8 +10,13 @@ class BookSessionRepository @Inject constructor(
 ) {
     private val tag = "BookSessionRepository"
 
-    fun getBookSessionDataStream(uuid: String): Flow<List<BookSessionData>> {
-        Log.d(tag, "getBookSessionDataStream: $uuid")
-        return dataSource.observeAllByUuid(uuid).map { it.toData() }
+    fun getBookSessionDataStream(bookId: String): Flow<List<BookSessionData>> {
+        Log.d(tag, "getBookSessionDataStream: $bookId")
+        return dataSource.observeAllByBookId(bookId).map { it.toData() }
+    }
+
+    suspend fun saveBookSessionData(bookSessionData: BookSessionData) {
+        Log.d(tag, "saveBookSessionData: $bookSessionData")
+        dataSource.upsert(bookSessionData.toEntity())
     }
 }
